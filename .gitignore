@@ -1,9 +1,18 @@
-.venv/
+# 打包产物（exe 可从源码重新构建，不入库）
+*.exe
+*.spec
 build/
 dist/
 __pycache__/
-*.spec
+*.pyc
+
+# 本地虚拟环境
+.venv/
+
+# 个人接口配置（每位用户不同，README 中有示例）
 config.json
+
+# 本地测试与临时文件
 test.png
 cli_out.txt
 github.md
