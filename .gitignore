@@ -1,0 +1,9 @@
+.venv/
+build/
+dist/
+__pycache__/
+*.spec
+config.json
+test.png
+cli_out.txt
+github.md
