@@ -473,7 +473,9 @@ def gui_main():
         win = ctk.CTkToplevel(root, fg_color=BG)
         win.title(S["settings_title"])
         win.transient(root)
-        win.grab_set()
+        win.after(150, lambda: (win.lift(), win.attributes("-topmost", True),
+                                win.attributes("-topmost", False), win.focus_force(),
+                                win.grab_set()))
         win.resizable(False, False)
 
         endpoint_var = tk.StringVar(value=_CONFIG.get("endpoint", "public"))
@@ -551,6 +553,8 @@ def gui_main():
         win = ctk.CTkToplevel(root, fg_color=BG)
         win.title(S["btn_tutorial"])
         win.geometry("640x580")
+        win.after(150, lambda: (win.lift(), win.attributes("-topmost", True),
+                                win.attributes("-topmost", False), win.focus_force()))
         box = ctk.CTkTextbox(win, wrap="word", font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), fg_color=CARD, text_color=TEXT, border_width=1, border_color=BORDER)
         box.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         box.insert("1.0", TUTORIAL.get(UI_LANG, TUTORIAL["zh"]))
@@ -562,6 +566,8 @@ def gui_main():
         win = ctk.CTkToplevel(root, fg_color=BG)
         win.title(S["btn_about"])
         win.transient(root)
+        win.after(150, lambda: (win.lift(), win.attributes("-topmost", True),
+                                win.attributes("-topmost", False), win.focus_force()))
         win.resizable(False, False)
         frm = ctk.CTkFrame(win, fg_color="transparent")
         frm.pack(fill=tk.BOTH, expand=True, padx=18, pady=16)
@@ -800,6 +806,12 @@ def gui_main():
     lang_var_holder = _Holder()
 
     build_ui()
+
+    # 测试钩子：设置 IT_TEST_TUTORIAL=1 时自动打开教程窗口后退出
+    if os.environ.get("IT_TEST_TUTORIAL"):
+        root.after(500, open_tutorial)
+        root.after(2500, root.destroy)
+
     root.mainloop()
 
 
