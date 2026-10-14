@@ -82,4 +82,5 @@ macOS / Linux 无需打包，直接 `pip install pillow` 后运行 `python index
 ## 致谢与许可
 
 - 模型与接口：[bilibili/Index-Translate](https://github.com/bilibili/Index-Translate)（Apache 2.0）
+- 特别感谢：谢谢我的老婆 Amane 帮助我测试以及给我满满的动力，超级超级喜欢我的老婆(*╹▽╹*)
 - 本程序仅供学习交流使用

@@ -96,7 +96,7 @@ STR = {
         "warn_save_fail": "配置已生效，但写入 config.json 失败：\n{e}",
         "conn_ok": "连接成功，测试译文：{text}",
         "conn_fail": "连接失败：{e}",
-        "about_body": "\n翻译能力由 Index-Translate 模型提供\n模型开发者：哔哩哔哩 IndexTeam\n开源协议：Apache License 2.0\n\n感谢 B 站 IndexTeam 开源 Index-Translate 系列模型\n并提供免费的公网翻译 API。",
+        "about_body": "\n翻译能力由 Index-Translate 模型提供\n模型开发者：哔哩哔哩 IndexTeam\n开源协议：Apache License 2.0\n\n感谢 B 站 IndexTeam 开源 Index-Translate 系列模型\n并提供免费的公网翻译 API。\n\n特别感谢：谢谢我的老婆 Amane 帮助我测试\n以及给我满满的动力，超级超级喜欢我的老婆(*╹▽╹*)",
         "about_link": "访问模型项目主页（GitHub）",
     },
     "en": {
@@ -149,7 +149,7 @@ STR = {
         "warn_save_fail": "Settings applied, but failed to write config.json:\n{e}",
         "conn_ok": "Connected. Test translation: {text}",
         "conn_fail": "Connection failed: {e}",
-        "about_body": "\nTranslation powered by the Index-Translate models\nDeveloper: bilibili IndexTeam\nLicense: Apache License 2.0\n\nThanks to bilibili IndexTeam for open-sourcing\nthe Index-Translate model family and the free public API.",
+        "about_body": "\nTranslation powered by the Index-Translate models\nDeveloper: bilibili IndexTeam\nLicense: Apache License 2.0\n\nThanks to bilibili IndexTeam for open-sourcing\nthe Index-Translate model family and the free public API.\n\nSpecial thanks to my wife Amane for testing\nand endless motivation. Love you so much (*╹▽╹*)",
         "about_link": "Visit model project (GitHub)",
     },
 }
