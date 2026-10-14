@@ -156,7 +156,7 @@ STR = {
 
 TUTORIAL = {
     "zh": """\
-【Index 全能翻译 - 使用教程】
+【Akira&Amane的翻译小软件 - 使用教程】
 
 ■ 图片翻译
 1. 切换到「图片翻译」标签页。
@@ -193,7 +193,7 @@ TUTORIAL = {
   属正常现象。
 """,
     "en": """\
-[Index Translator - Help]
+[Akira&Amane Translator - Help]
 
 ■ Image Translation
 1. Switch to the "Image" tab.
