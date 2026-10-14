@@ -23,7 +23,7 @@ import urllib.parse
 import urllib.request
 import urllib.error
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 MAX_SIDE = 2048  # 官方建议图片最长边不超过 2048px
 TIMEOUT = 300
@@ -383,15 +383,29 @@ def cli_main():
 
 def gui_main():
     import tkinter as tk
-    from tkinter import ttk, filedialog, messagebox
-    from PIL import Image, ImageGrab, ImageTk
+    from tkinter import filedialog, messagebox
+    import customtkinter as ctk
+    from PIL import Image, ImageGrab
 
     global S, UI_LANG
 
-    root = tk.Tk()
-    root.geometry("780x720")
+    # 小清新粉色系配色
+    PINK = "#FF8FB5"          # 主按钮粉
+    PINK_HOVER = "#FF6FA3"
+    PINK_SOFT = "#FFE4EE"     # 次按钮浅粉
+    PINK_SOFT_HOVER = "#FFD5E4"
+    BG = "#FFF7FA"            # 窗口背景：腮红粉白
+    CARD = "#FFFFFF"          # 卡片/标签页体：纯白
+    TEXT = "#5C4350"          # 柔和深梅灰文字
+    BORDER = "#F2CBDC"        # 输入框浅粉描边
+    STATUS_BG = "#FFE9F1"     # 状态栏
 
-    state = {"png_bytes": None, "preview_img": None, "busy": False,
+    ctk.set_appearance_mode("light")
+
+    root = ctk.CTk(fg_color=BG)
+    root.geometry("820x760")
+
+    state = {"png_bytes": None, "pil_img": None, "ctk_img": None, "busy": False,
              "src_text": "", "dst_text": "", "img_result": "", "tab": 0}
     refs = {}
 
@@ -436,44 +450,61 @@ def gui_main():
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def pink_btn(master, text, command, primary=False, **kw):
+        return ctk.CTkButton(
+            master, text=text, command=command, corner_radius=8,
+            fg_color=PINK if primary else PINK_SOFT,
+            hover_color=PINK_HOVER if primary else PINK_SOFT_HOVER,
+            text_color="#FFFFFF" if primary else "#B04A72",
+            font=ctk.CTkFont(family="Microsoft YaHei UI", size=13,
+                             weight="bold" if primary else "normal"),
+            **kw)
+
     # ---------- 接口设置窗口 ----------
     def open_settings():
         global API_URL, MODEL
-        win = tk.Toplevel(root)
+        win = ctk.CTkToplevel(root)
         win.title(S["settings_title"])
         win.transient(root)
         win.grab_set()
         win.resizable(False, False)
 
         endpoint_var = tk.StringVar(value=_CONFIG.get("endpoint", "public"))
-        url_var = tk.StringVar(value=API_URL)
-        model_var = tk.StringVar(value=MODEL)
         result_var = tk.StringVar(value="")
 
-        frm = ttk.Frame(win, padding=12)
-        frm.pack(fill=tk.BOTH, expand=True)
+        frm = ctk.CTkFrame(win, fg_color="transparent")
+        frm.pack(fill=tk.BOTH, expand=True, padx=16, pady=16)
+
+        ctk.CTkLabel(frm, text=S["lbl_endpoint"],
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=14, weight="bold")).pack(anchor=tk.W, pady=(0, 8))
 
         def apply_preset():
             ep = ENDPOINTS[endpoint_var.get()]
-            url_var.set(ep["api_url"])
-            model_var.set(ep["model"])
+            url_entry.delete(0, tk.END)
+            url_entry.insert(0, ep["api_url"])
+            model_entry.delete(0, tk.END)
+            model_entry.insert(0, ep["model"])
 
-        ttk.Label(frm, text=S["lbl_endpoint"], font=("Microsoft YaHei UI", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
-        for i, key in enumerate(["public", "local"]):
-            ttk.Radiobutton(frm, text=ENDPOINTS[key]["label"].get(UI_LANG, ENDPOINTS[key]["label"]["zh"]),
-                            value=key, variable=endpoint_var, command=apply_preset).grid(row=1 + i, column=0, columnspan=2, sticky=tk.W, padx=12)
+        for key in ["public", "local"]:
+            ctk.CTkRadioButton(frm, text=ENDPOINTS[key]["label"].get(UI_LANG, ENDPOINTS[key]["label"]["zh"]),
+                               value=key, variable=endpoint_var, command=apply_preset,
+                               fg_color=PINK, hover_color=PINK_HOVER).pack(anchor=tk.W, pady=2)
 
-        ttk.Label(frm, text=S["lbl_url"]).grid(row=3, column=0, sticky=tk.W, pady=(12, 2))
-        ttk.Entry(frm, textvariable=url_var, width=56).grid(row=4, column=0, columnspan=2, sticky=tk.W, padx=12)
-        ttk.Label(frm, text=S["lbl_model"]).grid(row=5, column=0, sticky=tk.W, pady=(8, 2))
-        ttk.Entry(frm, textvariable=model_var, width=56).grid(row=6, column=0, columnspan=2, sticky=tk.W, padx=12)
+        ctk.CTkLabel(frm, text=S["lbl_url"]).pack(anchor=tk.W, pady=(12, 2))
+        url_entry = ctk.CTkEntry(frm, width=460, fg_color=CARD, border_color=BORDER, text_color=TEXT)
+        url_entry.pack(anchor=tk.W)
+        url_entry.insert(0, API_URL)
+        ctk.CTkLabel(frm, text=S["lbl_model"]).pack(anchor=tk.W, pady=(8, 2))
+        model_entry = ctk.CTkEntry(frm, width=460, fg_color=CARD, border_color=BORDER, text_color=TEXT)
+        model_entry.pack(anchor=tk.W)
+        model_entry.insert(0, MODEL)
 
-        ttk.Label(frm, textvariable=result_var, foreground="gray", wraplength=420).grid(row=7, column=0, columnspan=2, sticky=tk.W, pady=(10, 0))
+        ctk.CTkLabel(frm, textvariable=result_var, text_color="gray", wraplength=440).pack(anchor=tk.W, pady=(10, 0))
 
-        btn_row = ttk.Frame(frm)
-        btn_row.grid(row=8, column=0, columnspan=2, pady=(12, 0), sticky=tk.W)
+        btn_row = ctk.CTkFrame(frm, fg_color="transparent")
+        btn_row.pack(anchor=tk.W, pady=(12, 0))
 
-        test_btn = ttk.Button(btn_row, text=S["btn_test"])
+        test_btn = pink_btn(btn_row, S["btn_test"], None)
         test_btn.pack(side=tk.LEFT, padx=(0, 8))
 
         def on_test():
@@ -481,7 +512,7 @@ def gui_main():
             test_btn.configure(state=tk.DISABLED)
 
             def worker():
-                ok, info = test_connection(url_var.get().strip(), model_var.get().strip())
+                ok, info = test_connection(url_entry.get().strip(), model_entry.get().strip())
                 msg = S["conn_ok"].format(text=info) if ok else S["conn_fail"].format(e=info)
                 win.after(0, lambda: (result_var.set(msg), test_btn.configure(state=tk.NORMAL)))
 
@@ -489,8 +520,8 @@ def gui_main():
 
         def on_save():
             global API_URL, MODEL
-            url = url_var.get().strip()
-            model = model_var.get().strip()
+            url = url_entry.get().strip()
+            model = model_entry.get().strip()
             if not url or not model:
                 messagebox.showwarning(S["warn_title"], S["warn_empty"], parent=win)
                 return
@@ -505,69 +536,75 @@ def gui_main():
             win.destroy()
 
         test_btn.configure(command=on_test)
-        ttk.Button(btn_row, text=S["btn_save"], command=on_save).pack(side=tk.LEFT, padx=8)
-        ttk.Button(btn_row, text=S["btn_cancel"], command=win.destroy).pack(side=tk.LEFT)
+        pink_btn(btn_row, S["btn_save"], on_save, primary=True).pack(side=tk.LEFT, padx=8)
+        pink_btn(btn_row, S["btn_cancel"], win.destroy).pack(side=tk.LEFT)
 
     # ---------- 使用教程窗口 ----------
     def open_tutorial():
-        win = tk.Toplevel(root)
+        win = ctk.CTkToplevel(root)
         win.title(S["btn_tutorial"])
-        win.geometry("620x560")
-        txt = tk.Text(win, wrap=tk.WORD, font=("Microsoft YaHei UI", 10), padx=12, pady=12)
-        txt.insert("1.0", TUTORIAL.get(UI_LANG, TUTORIAL["zh"]))
-        txt.configure(state=tk.DISABLED)
-        txt.pack(fill=tk.BOTH, expand=True)
-        scroll = ttk.Scrollbar(txt, command=txt.yview)
-        txt.configure(yscrollcommand=scroll.set)
-        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        win.geometry("640x580")
+        box = ctk.CTkTextbox(win, wrap="word", font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), fg_color=CARD, text_color=TEXT, border_width=1, border_color=BORDER)
+        box.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        box.insert("1.0", TUTORIAL.get(UI_LANG, TUTORIAL["zh"]))
+        box.configure(state=tk.DISABLED)
 
     # ---------- 关于窗口 ----------
     def open_about():
         import webbrowser
-        win = tk.Toplevel(root)
+        win = ctk.CTkToplevel(root)
         win.title(S["btn_about"])
         win.transient(root)
         win.resizable(False, False)
-        frm = ttk.Frame(win, padding=16)
-        frm.pack(fill=tk.BOTH, expand=True)
-        ttk.Label(frm, text=f"{S['app_title']}  v{__version__}", font=("Microsoft YaHei UI", 12, "bold")).pack(anchor=tk.W)
-        ttk.Label(frm, text=S["about_body"], justify=tk.LEFT).pack(anchor=tk.W, pady=4)
-        ttk.Button(frm, text=S["about_link"],
-                   command=lambda: webbrowser.open("https://github.com/bilibili/Index-Translate")).pack(anchor=tk.W, pady=(8, 0))
+        frm = ctk.CTkFrame(win, fg_color="transparent")
+        frm.pack(fill=tk.BOTH, expand=True, padx=18, pady=16)
+        ctk.CTkLabel(frm, text=f"{S['app_title']}  v{__version__}",
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=16, weight="bold")).pack(anchor=tk.W)
+        ctk.CTkLabel(frm, text=S["about_body"], justify=tk.LEFT,
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=12)).pack(anchor=tk.W, pady=6)
+        pink_btn(frm, S["about_link"],
+                 lambda: webbrowser.open("https://github.com/bilibili/Index-Translate")).pack(anchor=tk.W, pady=(8, 0))
 
     # ---------- 界面构建（语言切换时整体重建） ----------
     def build_ui():
         # 重建前保住正在编辑的内容
-        if "src_txt" in refs:
-            state["src_text"] = refs["src_txt"].get("1.0", tk.END)
-            state["dst_text"] = refs["dst_txt"].get("1.0", tk.END)
-            state["img_result"] = refs["img_result_txt"].get("1.0", tk.END)
-            state["tab"] = refs["notebook"].index(refs["notebook"].select())
+        if "src_box" in refs:
+            state["src_text"] = refs["src_box"].get("1.0", tk.END)
+            state["dst_text"] = refs["dst_box"].get("1.0", tk.END)
+            state["img_result"] = refs["img_result_box"].get("1.0", tk.END)
+            state["tab"] = 0 if refs["tabview"].get() == S["tab_image"].strip() else 1
         for w in root.winfo_children():
             w.destroy()
         refs.clear()
 
-        notebook = ttk.Notebook(root)
-        notebook.pack(fill=tk.BOTH, expand=True, padx=8, pady=(8, 0))
-        refs["notebook"] = notebook
+        tabview = ctk.CTkTabview(root, fg_color=CARD, corner_radius=10,
+                                 segmented_button_fg_color=STATUS_BG,
+                                 segmented_button_unselected_color=STATUS_BG,
+                                 segmented_button_unselected_hover_color=PINK_SOFT_HOVER,
+                                 segmented_button_selected_color=PINK,
+                                 segmented_button_selected_hover_color=PINK_HOVER,
+                                 text_color=TEXT)
+        tabview.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 0))
+        tab_img = tabview.add(S["tab_image"].strip())
+        tab_txt = tabview.add(S["tab_text"].strip())
+        refs["tabview"] = tabview
 
         # ===== 图片翻译页 =====
-        tab_img = ttk.Frame(notebook, padding=8)
-        notebook.add(tab_img, text=S["tab_image"])
+        img_top = ctk.CTkFrame(tab_img, fg_color="transparent")
+        img_top.pack(fill=tk.X, pady=(0, 6))
 
-        img_top = ttk.Frame(tab_img)
-        img_top.pack(fill=tk.X)
-
-        preview_lbl = ttk.Label(tab_img, text=S["preview_empty"], anchor=tk.CENTER)
+        preview_lbl = ctk.CTkLabel(tab_img, text=S["preview_empty"],
+                                   font=ctk.CTkFont(family="Microsoft YaHei UI", size=12))
         preview_lbl.pack(fill=tk.X, pady=4)
         refs["preview_lbl"] = preview_lbl
 
         def load_image(img, source_desc):
             state["png_bytes"] = normalize_image(img)
+            state["pil_img"] = img.copy()
             thumb = img.copy()
-            thumb.thumbnail((720, 240))
-            state["preview_img"] = ImageTk.PhotoImage(thumb)
-            refs["preview_lbl"].configure(image=state["preview_img"], text="")
+            thumb.thumbnail((700, 220))
+            state["ctk_img"] = ctk.CTkImage(light_image=thumb, dark_image=thumb, size=thumb.size)
+            refs["preview_lbl"].configure(image=state["ctk_img"], text="")
             set_status(S["status_loaded"].format(src=source_desc))
 
         def on_pick_file():
@@ -606,117 +643,126 @@ def gui_main():
                 messagebox.showinfo(S["warn_title"], S["msg_no_image"])
                 return
             target = img_lang_var.get()
-            img_result_txt.delete("1.0", tk.END)
+            img_result_box.delete("1.0", tk.END)
             run_async(lambda: translate_image(state["png_bytes"], target),
-                      lambda text: img_result_txt.insert("1.0", text),
+                      lambda text: img_result_box.insert("1.0", text),
                       S["status_busy_img"])
 
         def on_copy_image():
-            text = img_result_txt.get("1.0", tk.END).strip()
+            text = img_result_box.get("1.0", tk.END).strip()
             if text:
                 root.clipboard_clear()
                 root.clipboard_append(text)
                 set_status(S["status_copied"])
 
-        ttk.Button(img_top, text=S["btn_pick"], command=on_pick_file).pack(side=tk.LEFT, padx=4)
-        ttk.Button(img_top, text=S["btn_clipboard"], command=on_clipboard).pack(side=tk.LEFT, padx=4)
-        ttk.Label(img_top, text=S["lbl_target"]).pack(side=tk.LEFT, padx=(16, 4))
+        pink_btn(img_top, S["btn_pick"], on_pick_file).pack(side=tk.LEFT, padx=4)
+        pink_btn(img_top, S["btn_clipboard"], on_clipboard).pack(side=tk.LEFT, padx=4)
+        ctk.CTkLabel(img_top, text=S["lbl_target"],
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(side=tk.LEFT, padx=(16, 4))
         img_lang_var = tk.StringVar(value="中文")
-        ttk.Combobox(img_top, textvariable=img_lang_var, values=LANG_NAMES, width=8, state="readonly").pack(side=tk.LEFT)
-        ttk.Button(img_top, text=S["btn_translate"], command=do_translate_image).pack(side=tk.LEFT, padx=16)
-        ttk.Button(img_top, text=S["btn_copy"], command=on_copy_image).pack(side=tk.LEFT, padx=4)
+        ctk.CTkComboBox(img_top, variable=img_lang_var, values=LANG_NAMES, width=100, state="readonly", fg_color=CARD, border_color=BORDER, text_color=TEXT,
+                        button_color=PINK, button_hover_color=PINK_HOVER).pack(side=tk.LEFT)
+        pink_btn(img_top, S["btn_translate"], do_translate_image, primary=True).pack(side=tk.LEFT, padx=16)
+        pink_btn(img_top, S["btn_copy"], on_copy_image).pack(side=tk.LEFT, padx=4)
 
-        img_result_txt = tk.Text(tab_img, wrap=tk.WORD, font=("Microsoft YaHei UI", 11), height=10)
-        img_result_txt.pack(fill=tk.BOTH, expand=True, pady=4)
-        refs["img_result_txt"] = img_result_txt
+        img_result_box = ctk.CTkTextbox(tab_img, wrap="word",
+                                        font=ctk.CTkFont(family="Microsoft YaHei UI", size=13),
+                                        fg_color=CARD, text_color=TEXT, border_width=1, border_color=BORDER)
+        img_result_box.pack(fill=tk.BOTH, expand=True, pady=4)
+        refs["img_result_box"] = img_result_box
 
         # ===== 文本翻译页 =====
-        tab_txt = ttk.Frame(notebook, padding=8)
-        notebook.add(tab_txt, text=S["tab_text"])
+        ctk.CTkLabel(tab_txt, text=S["lbl_src"],
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(anchor=tk.W, pady=(0, 4))
 
-        txt_top = ttk.Frame(tab_txt)
-        txt_top.pack(fill=tk.X, pady=(0, 4))
-        ttk.Label(txt_top, text=S["lbl_src"]).pack(side=tk.LEFT)
+        src_box = ctk.CTkTextbox(tab_txt, wrap="word", height=150,
+                                 font=ctk.CTkFont(family="Microsoft YaHei UI", size=13),
+                                 fg_color=CARD, text_color=TEXT, border_width=1, border_color=BORDER)
+        src_box.pack(fill=tk.BOTH, expand=True)
+        refs["src_box"] = src_box
 
-        src_txt = tk.Text(tab_txt, wrap=tk.WORD, font=("Microsoft YaHei UI", 11), height=8)
-        src_txt.pack(fill=tk.BOTH, expand=True)
-        refs["src_txt"] = src_txt
-
-        txt_mid = ttk.Frame(tab_txt)
-        txt_mid.pack(fill=tk.X, pady=4)
-        ttk.Label(txt_mid, text=S["lbl_target"]).pack(side=tk.LEFT, padx=(0, 4))
+        txt_mid = ctk.CTkFrame(tab_txt, fg_color="transparent")
+        txt_mid.pack(fill=tk.X, pady=6)
+        ctk.CTkLabel(txt_mid, text=S["lbl_target"],
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(side=tk.LEFT, padx=(0, 4))
         txt_lang_var = tk.StringVar(value="中文")
-        ttk.Combobox(txt_mid, textvariable=txt_lang_var, values=LANG_NAMES, width=8, state="readonly").pack(side=tk.LEFT)
+        ctk.CTkComboBox(txt_mid, variable=txt_lang_var, values=LANG_NAMES, width=100, state="readonly", fg_color=CARD, border_color=BORDER, text_color=TEXT,
+                        button_color=PINK, button_hover_color=PINK_HOVER).pack(side=tk.LEFT)
 
         def do_translate_text():
-            text = src_txt.get("1.0", tk.END).strip()
+            text = src_box.get("1.0", tk.END).strip()
             if not text:
                 messagebox.showinfo(S["warn_title"], S["msg_no_text"])
                 return
             target = txt_lang_var.get()
-            dst_txt.delete("1.0", tk.END)
+            dst_box.delete("1.0", tk.END)
             run_async(lambda: translate_text(text, target),
-                      lambda result: dst_txt.insert("1.0", result),
+                      lambda result: dst_box.insert("1.0", result),
                       S["status_busy_txt"])
 
         def on_swap():
             """把译文放回原文框，方便接力翻译。"""
-            result = dst_txt.get("1.0", tk.END).strip()
+            result = dst_box.get("1.0", tk.END).strip()
             if result:
-                src_txt.delete("1.0", tk.END)
-                src_txt.insert("1.0", result)
+                src_box.delete("1.0", tk.END)
+                src_box.insert("1.0", result)
 
         def on_copy_text():
-            text = dst_txt.get("1.0", tk.END).strip()
+            text = dst_box.get("1.0", tk.END).strip()
             if text:
                 root.clipboard_clear()
                 root.clipboard_append(text)
                 set_status(S["status_copied"])
 
-        ttk.Button(txt_mid, text=S["btn_translate_text"], command=do_translate_text).pack(side=tk.LEFT, padx=16)
-        ttk.Button(txt_mid, text=S["btn_swap"], command=on_swap).pack(side=tk.LEFT, padx=4)
-        ttk.Button(txt_mid, text=S["btn_copy"], command=on_copy_text).pack(side=tk.LEFT, padx=4)
+        pink_btn(txt_mid, S["btn_translate_text"], do_translate_text, primary=True).pack(side=tk.LEFT, padx=16)
+        pink_btn(txt_mid, S["btn_swap"], on_swap).pack(side=tk.LEFT, padx=4)
+        pink_btn(txt_mid, S["btn_copy"], on_copy_text).pack(side=tk.LEFT, padx=4)
 
-        ttk.Label(tab_txt, text=S["lbl_dst"]).pack(anchor=tk.W)
-        dst_txt = tk.Text(tab_txt, wrap=tk.WORD, font=("Microsoft YaHei UI", 11), height=8)
-        dst_txt.pack(fill=tk.BOTH, expand=True)
-        refs["dst_txt"] = dst_txt
+        ctk.CTkLabel(tab_txt, text=S["lbl_dst"],
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(anchor=tk.W)
+        dst_box = ctk.CTkTextbox(tab_txt, wrap="word", height=150,
+                                 font=ctk.CTkFont(family="Microsoft YaHei UI", size=13),
+                                 fg_color=CARD, text_color=TEXT, border_width=1, border_color=BORDER)
+        dst_box.pack(fill=tk.BOTH, expand=True)
+        refs["dst_box"] = dst_box
 
-        src_txt.bind("<Control-Return>", lambda e: (do_translate_text(), "break"))
+        src_box.bind("<Control-Return>", lambda e: (do_translate_text(), "break"))
 
         # ---------- 底部全局按钮与状态栏 ----------
-        bottom = ttk.Frame(root, padding=(8, 4))
-        bottom.pack(fill=tk.X)
-        ttk.Button(bottom, text=S["btn_settings"], command=open_settings).pack(side=tk.LEFT, padx=4)
-        ttk.Button(bottom, text=S["btn_tutorial"], command=open_tutorial).pack(side=tk.LEFT, padx=4)
-        ttk.Button(bottom, text=S["btn_about"], command=open_about).pack(side=tk.LEFT, padx=4)
+        bottom = ctk.CTkFrame(root, fg_color="transparent")
+        bottom.pack(fill=tk.X, padx=10, pady=6)
+        pink_btn(bottom, S["btn_settings"], open_settings).pack(side=tk.LEFT, padx=4)
+        pink_btn(bottom, S["btn_tutorial"], open_tutorial).pack(side=tk.LEFT, padx=4)
+        pink_btn(bottom, S["btn_about"], open_about).pack(side=tk.LEFT, padx=4)
 
-        ttk.Label(bottom, text=S["lbl_ui_lang"]).pack(side=tk.LEFT, padx=(24, 4))
+        ctk.CTkLabel(bottom, text=S["lbl_ui_lang"],
+                     font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(side=tk.LEFT, padx=(24, 4))
         lang_display_var = tk.StringVar(value="中文" if UI_LANG == "zh" else "English")
         lang_var_holder.var = lang_display_var
-        ui_lang_box = ttk.Combobox(bottom, textvariable=lang_display_var, values=["中文", "English"],
-                                   width=8, state="readonly")
-        ui_lang_box.pack(side=tk.LEFT)
-        ui_lang_box.bind("<<ComboboxSelected>>", on_ui_lang_change)
+        ctk.CTkComboBox(bottom, variable=lang_display_var, values=["中文", "English"], width=100,
+                        state="readonly", command=on_ui_lang_change, fg_color=CARD, border_color=BORDER,
+                        text_color=TEXT, button_color=PINK, button_hover_color=PINK_HOVER).pack(side=tk.LEFT)
 
-        status_bar = ttk.Label(root, textvariable=status_var, relief=tk.SUNKEN, anchor=tk.W, padding=4)
-        status_bar.pack(fill=tk.X, side=tk.BOTTOM)
+        status_bar = ctk.CTkLabel(root, textvariable=status_var, anchor=tk.W,
+                                  font=ctk.CTkFont(family="Microsoft YaHei UI", size=11),
+                                  fg_color=STATUS_BG, text_color="#A64B70", corner_radius=6)
+        status_bar.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=(0, 8))
 
         # 恢复重建前的内容
-        if state["preview_img"] is not None:
-            preview_lbl.configure(image=state["preview_img"], text="")
+        if state["ctk_img"] is not None:
+            preview_lbl.configure(image=state["ctk_img"], text="")
         if state["img_result"].strip():
-            img_result_txt.insert("1.0", state["img_result"])
+            img_result_box.insert("1.0", state["img_result"])
         if state["src_text"].strip():
-            src_txt.insert("1.0", state["src_text"])
+            src_box.insert("1.0", state["src_text"])
         if state["dst_text"].strip():
-            dst_txt.insert("1.0", state["dst_text"])
-        notebook.select(state["tab"])
+            dst_box.insert("1.0", state["dst_text"])
+        tabview.set(S["tab_image"].strip() if state["tab"] == 0 else S["tab_text"].strip())
 
     # ---------- 界面语言实时切换 ----------
     def on_ui_lang_change(*_):
         global S, UI_LANG
-        lang = "en" if refs["notebook"] and lang_var_holder.get() == "English" else "zh"
+        lang = "en" if lang_var_holder.get() == "English" else "zh"
         if lang == UI_LANG:
             return
         UI_LANG = lang
