@@ -470,7 +470,7 @@ def gui_main():
     # ---------- 接口设置窗口 ----------
     def open_settings():
         global API_URL, MODEL
-        win = ctk.CTkToplevel(root)
+        win = ctk.CTkToplevel(root, fg_color=BG)
         win.title(S["settings_title"])
         win.transient(root)
         win.grab_set()
@@ -548,7 +548,7 @@ def gui_main():
 
     # ---------- 使用教程窗口 ----------
     def open_tutorial():
-        win = ctk.CTkToplevel(root)
+        win = ctk.CTkToplevel(root, fg_color=BG)
         win.title(S["btn_tutorial"])
         win.geometry("640x580")
         box = ctk.CTkTextbox(win, wrap="word", font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), fg_color=CARD, text_color=TEXT, border_width=1, border_color=BORDER)
@@ -559,7 +559,7 @@ def gui_main():
     # ---------- 关于窗口 ----------
     def open_about():
         import webbrowser
-        win = ctk.CTkToplevel(root)
+        win = ctk.CTkToplevel(root, fg_color=BG)
         win.title(S["btn_about"])
         win.transient(root)
         win.resizable(False, False)
@@ -668,7 +668,9 @@ def gui_main():
                      font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(side=tk.LEFT, padx=(16, 4))
         img_lang_var = tk.StringVar(value="中文")
         ctk.CTkComboBox(img_top, variable=img_lang_var, values=LANG_NAMES, width=100, state="readonly", fg_color=CARD, border_color=BORDER, text_color=TEXT,
-                        button_color=PINK, button_hover_color=PINK_HOVER).pack(side=tk.LEFT)
+                        button_color=PINK, button_hover_color=PINK_HOVER,
+                        dropdown_fg_color=CARD, dropdown_text_color=TEXT,
+                        dropdown_hover_color=PINK_SOFT).pack(side=tk.LEFT)
         pink_btn(img_top, S["btn_translate"], do_translate_image, primary=True).pack(side=tk.LEFT, padx=16)
         pink_btn(img_top, S["btn_copy"], on_copy_image).pack(side=tk.LEFT, padx=4)
 
@@ -694,7 +696,9 @@ def gui_main():
                      font=ctk.CTkFont(family="Microsoft YaHei UI", size=13), text_color=TEXT).pack(side=tk.LEFT, padx=(0, 4))
         txt_lang_var = tk.StringVar(value="中文")
         ctk.CTkComboBox(txt_mid, variable=txt_lang_var, values=LANG_NAMES, width=100, state="readonly", fg_color=CARD, border_color=BORDER, text_color=TEXT,
-                        button_color=PINK, button_hover_color=PINK_HOVER).pack(side=tk.LEFT)
+                        button_color=PINK, button_hover_color=PINK_HOVER,
+                        dropdown_fg_color=CARD, dropdown_text_color=TEXT,
+                        dropdown_hover_color=PINK_SOFT).pack(side=tk.LEFT)
 
         def do_translate_text():
             text = src_box.get("1.0", tk.END).strip()
@@ -748,7 +752,9 @@ def gui_main():
         lang_var_holder.var = lang_display_var
         ctk.CTkComboBox(bottom, variable=lang_display_var, values=["中文", "English"], width=100,
                         state="readonly", command=on_ui_lang_change, fg_color=CARD, border_color=BORDER,
-                        text_color=TEXT, button_color=PINK, button_hover_color=PINK_HOVER).pack(side=tk.LEFT)
+                        text_color=TEXT, button_color=PINK, button_hover_color=PINK_HOVER,
+                        dropdown_fg_color=CARD, dropdown_text_color=TEXT,
+                        dropdown_hover_color=PINK_SOFT).pack(side=tk.LEFT)
 
         status_bar = ctk.CTkLabel(root, textvariable=status_var, anchor=tk.W,
                                   font=ctk.CTkFont(family="Microsoft YaHei UI", size=11),
