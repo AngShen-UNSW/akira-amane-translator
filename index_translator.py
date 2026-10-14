@@ -23,7 +23,7 @@ import urllib.parse
 import urllib.request
 import urllib.error
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 MAX_SIDE = 2048  # 官方建议图片最长边不超过 2048px
 TIMEOUT = 300
