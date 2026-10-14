@@ -66,12 +66,14 @@
 
 ```bash
 python -m venv .venv
-.venv/Scripts/python -m pip install pillow pyinstaller   # Windows
-.venv/Scripts/python -m PyInstaller --onefile --windowed --name "Akira&Amane的翻译小软件" index_translator.py
+.venv/Scripts/python -m pip install pillow customtkinter pyinstaller   # Windows
+.venv/Scripts/python -m PyInstaller --onefile --windowed --icon icon.ico `
+    --add-data "icon.ico;." --collect-all customtkinter `
+    --name "Akira&Amane的翻译小软件" index_translator.py
 # 产物在 dist/Akira&Amane的翻译小软件.exe
 ```
 
-macOS / Linux 无需打包，直接 `pip install pillow` 后运行 `python index_translator.py`。
+macOS / Linux 无需打包，直接 `pip install pillow customtkinter` 后运行 `python index_translator.py`。
 
 ## 常见问题
 

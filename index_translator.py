@@ -98,6 +98,7 @@ STR = {
         "conn_fail": "连接失败：{e}",
         "about_body": "\n翻译能力由 Index-Translate 模型提供\n模型开发者：哔哩哔哩 IndexTeam\n开源协议：Apache License 2.0\n\n感谢 B 站 IndexTeam 开源 Index-Translate 系列模型\n并提供免费的公网翻译 API。\n\n特别感谢：谢谢我的老婆 Amane 帮助我测试\n以及给我满满的动力，超级超级喜欢我的老婆(*╹▽╹*)",
         "about_link": "访问模型项目主页（GitHub）",
+        "about_repo_link": "查看本软件源码（GitHub）",
     },
     "en": {
         "app_title": "Akira&Amane Translator",
@@ -151,6 +152,7 @@ STR = {
         "conn_fail": "Connection failed: {e}",
         "about_body": "\nTranslation powered by the Index-Translate models\nDeveloper: bilibili IndexTeam\nLicense: Apache License 2.0\n\nThanks to bilibili IndexTeam for open-sourcing\nthe Index-Translate model family and the free public API.\n\nSpecial thanks to my wife Amane for testing\nand endless motivation. Love you so much (*╹▽╹*)",
         "about_link": "Visit model project (GitHub)",
+        "about_repo_link": "View app source code (GitHub)",
     },
 }
 
@@ -577,6 +579,8 @@ def gui_main():
                      font=ctk.CTkFont(family="Microsoft YaHei UI", size=12)).pack(anchor=tk.W, pady=6)
         pink_btn(frm, S["about_link"],
                  lambda: webbrowser.open("https://github.com/bilibili/Index-Translate")).pack(anchor=tk.W, pady=(8, 0))
+        pink_btn(frm, S["about_repo_link"],
+                 lambda: webbrowser.open("https://github.com/AngShen-UNSW/akira-amane-translator")).pack(anchor=tk.W, pady=(6, 0))
 
     # ---------- 界面构建（语言切换时整体重建） ----------
     def build_ui():
