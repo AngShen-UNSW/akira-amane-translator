@@ -405,6 +405,13 @@ def gui_main():
     root = ctk.CTk(fg_color=BG)
     root.geometry("820x760")
 
+    # 运行窗口图标（打包时 --add-data 会把 icon.ico 放进 _MEIPASS）
+    try:
+        _base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+        root.iconbitmap(os.path.join(_base, "icon.ico"))
+    except Exception:
+        pass
+
     state = {"png_bytes": None, "pil_img": None, "ctk_img": None, "busy": False,
              "src_text": "", "dst_text": "", "img_result": "", "tab": 0}
     refs = {}
